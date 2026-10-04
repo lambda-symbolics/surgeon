@@ -27,18 +27,16 @@ A lowercase name such as \"cl-user\" therefore finds its package."
   "Read exactly one Common Lisp form from SOURCE relative to PACKAGE.
 
 PACKAGE stays unlocked while reading so that the reader may intern new symbols
-in it. Missing or trailing forms signal FORM-COUNT-ERROR; reader errors pass
-through."
+in it. A source without a form, or ending inside one, signals END-OF-FILE as
+READ-FROM-STRING does, so callers can tell incomplete input apart; trailing
+forms signal FORM-COUNT-ERROR, and reader errors pass through."
   (call-with-package-unlocked
    package
    (lambda ()
      (let ((*read-eval* read-eval)
            (*package* package)
            (end-marker (cons nil nil)))
-       (multiple-value-bind (form position) (read-from-string source nil end-marker)
-         (when (eq form end-marker)
-           (error 'form-count-error :source source
-                                    :message "Expected exactly one Common Lisp form, found none."))
+       (multiple-value-bind (form position) (read-from-string source t nil)
          (unless (eq (read-from-string source nil end-marker :start position) end-marker)
            (error 'form-count-error :source source
                                     :message "Expected exactly one Common Lisp form, found more."))
