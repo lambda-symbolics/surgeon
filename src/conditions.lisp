@@ -49,3 +49,15 @@ recorded, so a caller can describe them and retry naming one."))
     :reader definition-unsupported-form
     :documentation "The form that is not one supported complete definition."))
   (:documentation "A form is not a definition whose operator surgeon accepts."))
+
+(define-condition definition-not-found (surgeon-error)
+  ((pathname
+    :initarg :pathname
+    :reader definition-not-found-pathname
+    :type pathname
+    :documentation "The source file searched.")
+   (definition
+    :initarg :definition
+    :reader definition-not-found-definition
+    :documentation "The definition whose signature no top-level form matched."))
+  (:documentation "A source file holds no top-level form matching a definition."))

@@ -15,6 +15,9 @@
    #:definition-irreversible-definition
    #:definition-unsupported
    #:definition-unsupported-form
+   #:definition-not-found
+   #:definition-not-found-pathname
+   #:definition-not-found-definition
    ;; Packages, forms and symbols
    #:package-find
    #:call-with-package-unlocked
@@ -52,4 +55,13 @@
    #:value-binding-snapshot
    #:value-binding-restore
    #:package-functions-snapshot
-   #:package-functions-restore))
+   #:package-functions-restore
+   ;; Source forms
+   #:source-form
+   #:source-form-form
+   #:source-form-start
+   #:source-form-end
+   #:source-read-forms
+   #:source-definition-match-p
+   #:source-find-definition
+   #:source-replace-definition))

@@ -5,6 +5,7 @@
   :version "0.1.0"
   :serial t
   :depends-on (#:closer-mop
+               #:ls-compat/files
                #:sb-introspect
                #:serapeum)
   :components ((:module "src"
@@ -14,7 +15,8 @@
                              (:file "symbols")
                              (:file "restarts")
                              (:file "definitions")
-                             (:file "undo"))))
+                             (:file "undo")
+                             (:file "source-forms"))))
   :in-order-to ((asdf:test-op (asdf:test-op #:surgeon/tests))))
 
 (asdf:defsystem #:surgeon/tests
@@ -26,6 +28,7 @@
                 :components ((:file "test-support")
                              (:file "symbol-tests")
                              (:file "definition-tests")
+                             (:file "source-form-tests")
                              (:file "tests"))))
   :perform (asdf:test-op (operation component)
              (declare (ignore operation component))
