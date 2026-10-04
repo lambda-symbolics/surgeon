@@ -68,6 +68,12 @@
      (test-assert (null (package-find "SURGEON-NO-SUCH-PACKAGE")))
      (test-equal '(+ 1 2) (read-one-form "(+ 1 2)" :package package))
      (test-signals form-count-error (read-one-form "1 2" :package package))
+     (let ((message (handler-case (progn (read-one-form "(list 1) (list 2)" :package package) nil)
+                      (form-count-error (condition)
+                        (surgeon-error-message condition)))))
+       (test-assert (and message
+                         (search "ends at character 8" message)
+                         (search "(list 2)" message))))
      (test-signals end-of-file (read-one-form "  " :package package))
      (test-signals end-of-file (read-one-form "(+ 1" :package package))
      (test-signals reader-error (read-one-form "#.(+ 1 2)" :read-eval nil :package package))

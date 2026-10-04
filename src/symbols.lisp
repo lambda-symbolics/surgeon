@@ -36,11 +36,25 @@ forms signal FORM-COUNT-ERROR, and reader errors pass through."
      (let ((*read-eval* read-eval)
            (*package* package)
            (end-marker (cons nil nil)))
-       (multiple-value-bind (form position) (read-from-string source t nil)
+       (multiple-value-bind (form position)
+           (read-from-string source t nil :preserve-whitespace t)
          (unless (eq (read-from-string source nil end-marker :start position) end-marker)
-           (error 'form-count-error :source source
-                                    :message "Expected exactly one Common Lisp form, found more."))
+           (error 'form-count-error
+                  :source source
+                  :message (format nil "Expected exactly one Common Lisp form, but another ~
+                                        follows the first, which ends at character ~D: ~S. ~
+                                        Check the parentheses, or wrap several forms in PROGN."
+                                   position (form--trailing-excerpt source position))))
          form)))))
+
+(-> form--trailing-excerpt (string integer) string)
+(defun form--trailing-excerpt (source position)
+  "Return the start of the text after POSITION in SOURCE, at most 80 characters."
+  (let ((rest (string-left-trim '(#\Space #\Tab #\Newline #\Return)
+                                (subseq source position))))
+    (if (> (length rest) 80)
+        (concatenate 'string (subseq rest 0 80) "...")
+        rest)))
 
 (-> resolve-symbol (string &key (:package package)) symbol)
 (defun resolve-symbol (name &key (package *package*))
