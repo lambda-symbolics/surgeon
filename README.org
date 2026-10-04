@@ -1,0 +1,105 @@
+#+TITLE: surgeon
+#+STARTUP: content
+
+=surgeon= is the SBCL machinery a program needs to look into its own running
+image and change it reversibly: what a name defines, which defined names
+resemble a guess, what a function's lambda list is, which restarts an error
+offers, what a definition replaces and how to put it back, and where a
+definition sits in a source file. Self-modifying programs, REPL front ends and
+IDE-like tools all need the same pieces.
+
+* Names and packages
+
+=symbol-definition-kinds= reports the kinds a symbol defines, among
+=:function=, =:macro=, =:generic-function=, =:class=, =:condition=,
+=:variable= and =:type=. =package-apropos= lists the defined symbols present
+in a package whose names contain every term of a query, and
+=package-symbol-suggestions= proposes defined names close to a misspelled one.
+Names interned by misspelled lookups define nothing, so neither ever lists
+them.
+
+#+BEGIN_SRC lisp
+(surgeon:package-apropos "hash table" :package (find-package "CL") :kind :function)
+;; => ((HASH-TABLE-COUNT :FUNCTION) (HASH-TABLE-P :FUNCTION) ...)
+
+(surgeon:package-symbol-suggestions "make-hash-tabel" :package (find-package "CL"))
+;; => (MAKE-HASH-TABLE ASH SXHASH)
+#+END_SRC
+
+=symbol-lambda-list= recovers lambda lists through the MOP and
+=sb-introspect=, =symbol-definition-pathname= finds the source file SBCL
+recorded, and =symbol-documentation-line= and =symbol-label= render one-line
+summaries. =read-one-form= reads exactly one form with the package unlocked so
+the reader may intern, =resolve-symbol= accepts ='name= and =#'name=, and
+=package-find= accepts lowercase names.
+
+* Choosing restarts without a debugger
+
+=call-with-restart-choice= runs an operation and, when an error offers
+restarts, signals =restart-choice-available= with their names and reports. A
+caller that cannot drive a debugger describes them, then runs the operation
+again naming one; the restart is invoked while the signaling frame is live.
+=ABORT= is never offered, since it would unwind the caller instead of
+correcting the operation.
+
+#+BEGIN_SRC lisp
+(surgeon:call-with-restart-choice
+ (lambda () (load-settings))
+ :restart-name "use-value"
+ :restart-value-function (lambda () (default-settings)))
+#+END_SRC
+
+* Reversible redefinition
+
+=definition-signature= identifies a top-level definition by operator and name,
+and a method by its generic function, qualifiers and required specializers;
+=definition-key= prints that identity as a stable string.
+=definition-undo-capture= records what installing a definition replaces and
+returns a function that restores it exactly:
+
+- function, generic function and macro bindings, macros and functions
+  replacing each other included;
+- compiler macros;
+- one method, while leaving the generic function's other methods alone, and
+  removing a generic function the method created;
+- variable values together with SBCL's recorded variable kind;
+- SBCL's type record for =deftype=, with its caches dropped;
+- classes, structures and conditions, by reinstalling the previous source or
+  by removing a new class and every function it added to its package.
+
+#+BEGIN_SRC lisp
+(let* ((definition '(defun greet () :new))
+       (undo (surgeon:definition-undo-capture (first definition) definition *package*)))
+  (eval definition)
+  (funcall undo))
+#+END_SRC
+
+An existing class cannot be restored in place, so redefining one requires its
+previous source. Hosts add their own defining macros with an EQL method on
+=definition-operator-p= and one on =definition-undo-capture=; anything else
+signals =definition-irreversible=.
+
+* Definitions in source files
+
+=source-read-forms= returns each top-level form with its exact character span,
+skipping line and nested block comments. =source-find-definition= finds the
+form matching a definition's signature, and =source-replace-definition=
+replaces exactly that span, atomically and with everything else in the file
+preserved.
+
+* Conditions
+
+Every condition is a =surgeon-error= with a message: =form-count-error=,
+=restart-choice-available=, =definition-irreversible=,
+=definition-unsupported= and =definition-not-found=.
+
+* Development
+
+#+BEGIN_SRC sh
+./script/bootstrap
+./script/check
+#+END_SRC
+
+* License
+
+surgeon is distributed under the COLL-Attribution license in =LICENSE.lisp=.
