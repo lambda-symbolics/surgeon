@@ -35,3 +35,17 @@
 
 It is signaled from inside the handler, after the restarts have been
 recorded, so a caller can describe them and retry naming one."))
+
+(define-condition definition-irreversible (surgeon-error)
+  ((definition
+    :initarg :definition
+    :reader definition-irreversible-definition
+    :documentation "The definition whose installation could not be made reversible."))
+  (:documentation "No exact undo action can be captured before installing a definition."))
+
+(define-condition definition-unsupported (surgeon-error)
+  ((form
+    :initarg :form
+    :reader definition-unsupported-form
+    :documentation "The form that is not one supported complete definition."))
+  (:documentation "A form is not a definition whose operator surgeon accepts."))

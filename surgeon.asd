@@ -12,7 +12,9 @@
                 :components ((:file "package")
                              (:file "conditions")
                              (:file "symbols")
-                             (:file "restarts"))))
+                             (:file "restarts")
+                             (:file "definitions")
+                             (:file "undo"))))
   :in-order-to ((asdf:test-op (asdf:test-op #:surgeon/tests))))
 
 (asdf:defsystem #:surgeon/tests
@@ -23,6 +25,7 @@
                 :serial t
                 :components ((:file "test-support")
                              (:file "symbol-tests")
+                             (:file "definition-tests")
                              (:file "tests"))))
   :perform (asdf:test-op (operation component)
              (declare (ignore operation component))
