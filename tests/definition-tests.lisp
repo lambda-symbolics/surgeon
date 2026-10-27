@@ -2,6 +2,7 @@
 
 ;;;; -- Definition and Undo Tests --
 
+(-> definition-tests--install (package string &key (:previous-source (or null string))) function)
 (defun definition-tests--install (package source &key previous-source)
   "Capture an undo for SOURCE in PACKAGE, install it, and return the undo function."
   (let* ((definition (read-one-form source :package package))

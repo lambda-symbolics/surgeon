@@ -38,6 +38,7 @@
        (,condition-type (,condition)
          ,condition))))
 
+(-> call-with-scratch-package (function) t)
 (defun call-with-scratch-package (function)
   "Call FUNCTION with a fresh package using COMMON-LISP, deleting it afterwards."
   (let ((package (make-package (format nil "SURGEON-SCRATCH-~D" (random most-positive-fixnum))
@@ -45,6 +46,7 @@
     (unwind-protect (funcall function package)
       (delete-package package))))
 
+(-> scratch-evaluate (package string) t)
 (defun scratch-evaluate (package source)
   "Read SOURCE in PACKAGE and evaluate it there."
   (let ((*package* package))
