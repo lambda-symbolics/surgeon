@@ -225,7 +225,9 @@ and shorter names break ties."
          (scored '()))
     (dolist (symbol (package-present-symbols package))
       (let* ((candidate (string-downcase (symbol-name symbol)))
-             (score     (apropos--suggestion-score candidate tokens guess token-minimum)))
+             (score     (apropos--suggestion-score candidate tokens
+                                                   :guess   guess
+                                                   :minimum token-minimum)))
         (when (and (plusp score)
                    (string/= candidate guess)
                    (symbol-defined-p symbol))
@@ -270,8 +272,8 @@ and shorter names break ties."
                (setf start (1+ index)))
     (remove-duplicates (nreverse tokens) :test #'string=)))
 
-(-> apropos--suggestion-score (string list string (integer 1)) integer)
-(defun apropos--suggestion-score (candidate tokens guess minimum)
+(-> apropos--suggestion-score (string list &key (:guess string) (:minimum (integer 1))) integer)
+(defun apropos--suggestion-score (candidate tokens &key guess minimum)
   "Return how strongly lowercase CANDIDATE resembles GUESS through its TOKENS.
 
 Containment of one name in the other adds a point only when the shorter name
