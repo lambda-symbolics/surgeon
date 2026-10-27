@@ -5,8 +5,8 @@
 (defun definition-tests--install (package source &key previous-source)
   "Capture an undo for SOURCE in PACKAGE, install it, and return the undo function."
   (let* ((definition (read-one-form source :package package))
-         (undo (definition-undo-capture (first definition) definition package
-                                        :previous-source previous-source)))
+         (undo       (definition-undo-capture (first definition) definition package
+                                              :previous-source previous-source)))
     (let ((*package* package))
       (eval definition))
     undo))

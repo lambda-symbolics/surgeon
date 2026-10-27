@@ -46,7 +46,7 @@
                          (package-apropos "MAKE wid" :package package :kind ':function)))
      (test-equal '("WIDGET-MAKE")
                  (mapcar #'symbol-name (package-symbol-suggestions "widget-mak" :package package
-                                                                                 :limit 1)))
+                                                                                 :limit  1)))
      (test-assert (member "GADGET-MAKE"
                           (mapcar #'symbol-name (package-symbol-suggestions "gadget-make-it"
                                                                             :package package))
@@ -96,7 +96,7 @@
                :report "Abort."
                :aborted))))
     (test-equal 42 (call-with-restart-choice #'offer
-                                             :restart-name "use-value"
+                                             :restart-name           "use-value"
                                              :restart-value-function (constantly 42)))
     (let ((condition (test-signals restart-choice-available (call-with-restart-choice #'offer))))
       (test-equal '("USE-VALUE" . "Use a value.")

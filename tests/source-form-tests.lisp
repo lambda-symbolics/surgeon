@@ -21,7 +21,7 @@
       (test-equal (source-form-form source-form)
                   (read-from-string *source-form-tests-text* t nil
                                     :start (source-form-start source-form)
-                                    :end (source-form-end source-form))
+                                    :end   (source-form-end source-form))
                   :description "each span holds exactly its form"))
     (test-equal "(defmethod speak ((x string)) x)"
                 (let ((source-form (third forms)))

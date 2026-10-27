@@ -51,7 +51,7 @@ condition and its RESTART-CHOICES. Errors without restarts pass through."
              (let ((choices (restart-choices condition)))
                (when choices
                  (error 'restart-choice-available
-                        :message (princ-to-string condition)
+                        :message   (princ-to-string condition)
                         :condition condition
-                        :choices choices)))))))
+                        :choices   choices)))))))
     (funcall thunk)))

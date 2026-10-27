@@ -92,10 +92,10 @@ specializers; every other definition by its operator and name."
 (-> definition--method-parts (list) (values list list))
 (defun definition--method-parts (definition)
   "Return the qualifiers and specialized lambda list of DEFMETHOD form DEFINITION."
-  (let* ((tail (rest (rest definition)))
+  (let* ((tail            (rest (rest definition)))
          (lambda-position (position-if #'listp tail)))
     (unless lambda-position
-      (error 'definition-unsupported :form definition
+      (error 'definition-unsupported :form    definition
                                      :message "The DEFMETHOD form has no lambda list."))
     (values (subseq tail 0 lambda-position)
             (nth lambda-position tail))))

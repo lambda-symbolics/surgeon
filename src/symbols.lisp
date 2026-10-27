@@ -34,13 +34,13 @@ forms signal FORM-COUNT-ERROR, and reader errors pass through."
    package
    (lambda ()
      (let ((*read-eval* read-eval)
-           (*package* package)
-           (end-marker (cons nil nil)))
+           (*package*   package)
+           (end-marker  (cons nil nil)))
        (multiple-value-bind (form position)
            (read-from-string source t nil :preserve-whitespace t)
          (unless (eq (read-from-string source nil end-marker :start position) end-marker)
            (error 'form-count-error
-                  :source source
+                  :source  source
                   :message (format nil "Expected exactly one Common Lisp form, but another ~
                                         follows the first, which ends at character ~D: ~S. ~
                                         Check the parentheses, or wrap several forms in PROGN."
@@ -62,7 +62,7 @@ forms signal FORM-COUNT-ERROR, and reader errors pass through."
 
 A quoted or function-quoted symbol, as in 'name or #'name, resolves to the
 symbol itself. Anything else signals SURGEON-ERROR."
-  (let* ((form (read-one-form name :read-eval nil :package package))
+  (let* ((form  (read-one-form name :read-eval nil :package package))
          (value (if (and (consp form)
                          (member (first form) '(quote function))
                          (consp (rest form))
@@ -200,7 +200,7 @@ Every whitespace-separated term of QUERY must occur in the symbol name without
 regard to case. KIND keeps only symbols carrying that definition kind. Symbols
 without any definition are never returned, so names interned by misspelled
 lookups stay invisible. Matches are sorted by name."
-  (let ((terms (apropos--terms query))
+  (let ((terms   (apropos--terms query))
         (matches '()))
     (dolist (symbol (package-present-symbols package))
       (let ((name (string-downcase (symbol-name symbol))))
@@ -220,12 +220,12 @@ Candidates share at least one separator-delimited token of TOKEN-MINIMUM or
 more characters with NAME, or contain it, or are contained by it when the
 shorter of the two has TOKEN-MINIMUM characters; stronger overlaps rank first
 and shorter names break ties."
-  (let* ((guess (string-downcase (string-trim "'#:" name)))
+  (let* ((guess  (string-downcase (string-trim "'#:" name)))
          (tokens (apropos--name-tokens guess token-minimum))
          (scored '()))
     (dolist (symbol (package-present-symbols package))
       (let* ((candidate (string-downcase (symbol-name symbol)))
-             (score (apropos--suggestion-score candidate tokens guess token-minimum)))
+             (score     (apropos--suggestion-score candidate tokens guess token-minimum)))
         (when (and (plusp score)
                    (string/= candidate guess)
                    (symbol-defined-p symbol))
@@ -261,7 +261,7 @@ and shorter names break ties."
 (defun apropos--name-tokens (name minimum)
   "Return the distinct separator-delimited tokens of NAME with at least MINIMUM characters."
   (let ((tokens '())
-        (start 0))
+        (start  0))
     (loop for index from 0 to (length name)
           when (or (= index (length name))
                    (member (char name index) '(#\- #\: #\. #\/ #\Space)))

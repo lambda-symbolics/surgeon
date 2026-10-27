@@ -25,7 +25,7 @@ DEFINITION-IRREVERSIBLE."))
   (declare (ignore operator package previous-source))
   (error 'definition-irreversible
          :definition definition
-         :message "The definition kind has no reversible installation strategy."))
+         :message    "The definition kind has no reversible installation strategy."))
 
 (defmethod definition-undo-capture :around (operator definition package &key previous-source)
   "Run the captured undo function with DEFINITION's packages unlocked."
@@ -54,7 +54,7 @@ DEFINITION-IRREVERSIBLE."))
                                     &key previous-source)
   "Restore the replaced compiler macro, or its absence."
   (declare (ignore package previous-source))
-  (let* ((name (second definition))
+  (let* ((name    (second definition))
          (binding (compiler-macro-function name)))
     (lambda ()
       (setf (compiler-macro-function name) binding))))
@@ -91,7 +91,7 @@ DEFINITION-IRREVERSIBLE."))
 (defmethod definition-undo-capture ((operator (eql 'deftype)) definition package &key previous-source)
   "Restore SBCL's recorded type kind, expander and source location, then drop type caches."
   (declare (ignore package previous-source))
-  (let* ((name (second definition))
+  (let* ((name      (second definition))
          (snapshots (loop for kind in '(:kind :expander :source-location)
                           collect (cons kind (multiple-value-list (sb-int:info :type kind name))))))
     (lambda ()
@@ -196,7 +196,7 @@ DEFINITION-IRREVERSIBLE."))
 (defun undo--variable (symbol)
   "Return an undo function restoring SYMBOL's value and recorded variable kind."
   (let ((value (value-binding-snapshot symbol))
-        (kind (multiple-value-list (sb-int:info :variable :kind symbol))))
+        (kind  (multiple-value-list (sb-int:info :variable :kind symbol))))
     (lambda ()
       (value-binding-restore symbol value)
       (undo--restore-info symbol :category ':variable :kind ':kind :snapshot kind))))
@@ -207,12 +207,12 @@ DEFINITION-IRREVERSIBLE."))
 
 An existing class can only be restored from PREVIOUS-SOURCE, since a class
 object cannot be reinstated in place; without it the installation is refused."
-  (let ((name (second definition))
+  (let ((name      (second definition))
         (functions (package-functions-snapshot package)))
     (when (and (find-class name nil) (null previous-source))
       (error 'definition-irreversible
              :definition definition
-             :message "The existing class has no recoverable source, so its redefinition cannot be made reversible."))
+             :message    "The existing class has no recoverable source, so its redefinition cannot be made reversible."))
     (lambda ()
       (if previous-source
           (let ((*package* package))
