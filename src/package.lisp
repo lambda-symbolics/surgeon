@@ -1,4 +1,5 @@
 (defpackage #:surgeon
+  (:documentation "Introspection and reversible redefinition for live SBCL images.")
   (:use #:cl)
   (:import-from #:serapeum
                 #:->)
