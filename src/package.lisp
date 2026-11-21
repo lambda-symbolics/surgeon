@@ -53,6 +53,7 @@
    #:definition-undo-capture
    #:function-binding-snapshot
    #:function-binding-restore
+   #:call-with-function-replacements
    #:value-binding-snapshot
    #:value-binding-restore
    #:package-functions-snapshot
@@ -63,6 +64,16 @@
    #:source-form-start
    #:source-form-end
    #:source-read-forms
+   #:source-definition
+   #:source-definition-pathname
+   #:source-definition-form
+   #:source-definition-text
+   #:source-definition-name
+   #:source-definition-key
+   #:source-definition-index
+   #:source-forms-equal-p
+   #:asdf-source-pathnames
+   #:asdf-direct-dependency-names
    #:source-definition-match-p
    #:source-find-definition
    #:source-replace-definition))

@@ -40,6 +40,60 @@ skipped, so each span covers exactly one form. Read-time evaluation is off."
         (push (make-instance 'source-form :form form :start position :end end) forms)
         (setf position end)))))
 
+(defstruct source-definition
+  "One definition with its full parsed form, origin, and exact source."
+  (pathname nil :read-only t)
+  (form nil :read-only t)
+  (text "" :type string :read-only t))
+
+(-> source-definition-name (source-definition) t)
+(defun source-definition-name (definition)
+  "Return DEFINITION's original name, including any SETF designator."
+  (second (source-form-form (source-definition-form definition))))
+
+(-> source-definition-key (source-definition) string)
+(defun source-definition-key (definition)
+  "Return the key of DEFINITION, retaining its qualifiers and specializers."
+  (definition-key (source-form-form (source-definition-form definition))))
+
+(-> source-definition-index (list &key (:package package) (:name t)) hash-table)
+(defun source-definition-index (pathnames &key (package *package*) (name nil name-p))
+  "Index definitions in PATHNAMES by EQUAL name, optionally retaining only NAME.
+
+Each name's records are ordered by pathname namestring, then by source position.
+Use the caller's PACKAGE and dynamic definition operators. Reader and file
+errors propagate without returning a partial index."
+  (let ((index (make-hash-table :test #'equal)))
+    (dolist (pathname (stable-sort (copy-list pathnames) #'string< :key #'namestring))
+      (let ((source (uiop:read-file-string pathname)))
+        (dolist (source-form (source-read-forms source :package package))
+          (let ((form (source-form-form source-form)))
+            (when (and (definition-form-p form)
+                       (or (not name-p) (equal name (second form))))
+              (push (make-source-definition :pathname pathname
+                                            :form     source-form
+                                            :text     (subseq source (source-form-start source-form)
+                                                              (source-form-end source-form)))
+                    (gethash (second form) index)))))))
+    (maphash (lambda (name definitions)
+               (setf (gethash name index) (nreverse definitions)))
+             index)
+    index))
+
+(-> source-forms-equal-p ((or null string) (or null string) function) boolean)
+(defun source-forms-equal-p (first-source second-source reader)
+  "Compare optional sources using READER, falling back to exact text on a read error."
+  (cond
+    ((and (null first-source) (null second-source))
+     t)
+    ((or (null first-source) (null second-source))
+     nil)
+    (t
+     (handler-case
+         (equal (funcall reader first-source) (funcall reader second-source))
+       (error ()
+         (string= first-source second-source))))))
+
 (-> source-definition-match-p (source-form list) boolean)
 (defun source-definition-match-p (source-form definition)
   "Return true when SOURCE-FORM is a definition with DEFINITION's signature."

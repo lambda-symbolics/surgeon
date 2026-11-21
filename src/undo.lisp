@@ -145,6 +145,32 @@ DEFINITION-IRREVERSIBLE."))
        (setf (fdefinition name) binding))))
   nil)
 
+(-> call-with-function-replacements (list function) t)
+(defun call-with-function-replacements (replacements function)
+  "Call FUNCTION with temporary global bindings from (SYMBOL FUNCTION) pairs.
+
+Every symbol must already be fbound. Restore the bindings on any exit, and
+return all values of FUNCTION. No package locks are changed. Callers must
+coordinate concurrent access to the affected global bindings."
+  (let ((originals
+          (mapcar (lambda (replacement)
+                    (let ((name (first replacement)))
+                    (check-type name symbol)
+                    (unless (fboundp name)
+                      (error 'undefined-function :name name))
+                      (cons name (function-binding-snapshot name))))
+                  replacements))
+        (installed nil))
+    (unwind-protect
+         (progn
+           (loop for replacement in replacements
+                 for original in originals
+                 do (setf (symbol-function (first replacement)) (second replacement))
+                    (push original installed))
+           (funcall function))
+      (dolist (original installed)
+        (function-binding-restore (first original) (rest original))))))
+
 (-> value-binding-snapshot (symbol) list)
 (defun value-binding-snapshot (symbol)
   "Return a snapshot of SYMBOL's exact global value, or of its absence."

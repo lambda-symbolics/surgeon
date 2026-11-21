@@ -12,6 +12,37 @@
       (eval definition))
     undo))
 
+(define-test scoped-function-replacement
+  (let* ((target   (gensym "SCOPED-TARGET"))
+         (missing  (gensym "SCOPED-MISSING"))
+         (original (lambda () :original))
+         (outer    (lambda () :outer))
+         (inner    (lambda () :inner)))
+    (setf (symbol-function target) original)
+    (test-equal '(:outer :second-value)
+                (multiple-value-list
+                 (call-with-function-replacements
+                  (list (list target outer))
+                  (lambda ()
+                    (test-signals simple-error
+                      (call-with-function-replacements
+                       (list (list target inner))
+                       (lambda ()
+                         (test-equal :inner (funcall target))
+                         (error "Leave the inner scope."))))
+                    (values (funcall target) :second-value)))))
+    (test-equal original (symbol-function target))
+    (test-signals undefined-function
+      (call-with-function-replacements
+       (list (list target outer) (list missing inner))
+       (lambda () (error "Invalid preflight must not call the body."))))
+    (test-equal original (symbol-function target))
+    (test-signals type-error
+      (call-with-function-replacements
+       (list (list target outer) (list target 42))
+       (lambda () (error "A failed installation must not call the body."))))
+    (test-equal original (symbol-function target))))
+
 (define-test definition-signatures
   (test-assert (definition-form-p '(defun f () nil)))
   (test-assert (definition-form-p '(defun (setf f) (value) value)))
