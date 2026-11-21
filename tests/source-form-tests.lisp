@@ -53,7 +53,7 @@
         (delete-file pathname)))))
 
 (define-test source-definition-index-order-and-keys
-  (let* ((prefix (format nil "surgeon-index-~D" (random most-positive-fixnum)))
+  (let* ((prefix     (format nil "surgeon-index-~D" (random most-positive-fixnum)))
          (first-path (merge-pathnames (format nil "~A-a.lisp" prefix) (uiop:temporary-directory)))
          (last-path  (merge-pathnames (format nil "~A-z.lisp" prefix) (uiop:temporary-directory)))
          (primary    "(defmethod speak ((x string)) x)"))
@@ -75,8 +75,9 @@
                           (find key records :test #'string= :key #'source-definition-key)))
              (test-equal '(setf speak)
                          (source-definition-name (first (gethash '(setf speak) index))))
-             (let ((filtered (source-definition-index paths :package (find-package :surgeon)
-                                                            :name 'speak)))
+             (let ((filtered (source-definition-index paths
+                                                      :package (find-package :surgeon)
+                                                      :name    'speak)))
                (test-equal 1 (hash-table-count filtered))
                (test-equal (mapcar #'source-definition-text records)
                            (mapcar #'source-definition-text (gethash 'speak filtered)))))

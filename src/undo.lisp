@@ -153,13 +153,14 @@ Every symbol must already be fbound. Restore the bindings on any exit, and
 return all values of FUNCTION. No package locks are changed. Callers must
 coordinate concurrent access to the affected global bindings."
   (let ((originals
-          (mapcar (lambda (replacement)
-                    (let ((name (first replacement)))
-                    (check-type name symbol)
-                    (unless (fboundp name)
-                      (error 'undefined-function :name name))
-                      (cons name (function-binding-snapshot name))))
-                  replacements))
+          (loop for replacement in replacements
+                for name = (first replacement)
+                do (check-type name symbol)
+                   (unless (fboundp name)
+                     (error 'replacement-function-unbound
+                            :name    name
+                            :message (format nil "Cannot temporarily replace unbound function ~S." name)))
+                collect (cons name (function-binding-snapshot name))))
         (installed nil))
     (unwind-protect
          (progn

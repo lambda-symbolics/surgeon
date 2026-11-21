@@ -61,3 +61,7 @@ recorded, so a caller can describe them and retry naming one."))
     :reader        definition-not-found-definition
     :documentation "The definition whose signature no top-level form matched."))
   (:documentation "A source file holds no top-level form matching a definition."))
+
+(define-condition replacement-function-unbound (undefined-function surgeon-error)
+  ()
+  (:documentation "A scoped replacement requires an existing function binding."))

@@ -16,8 +16,8 @@
                               (:file "restarts")
                               (:file "definitions")
                               (:file "undo")
-                               (:file "source-forms")
-                               (:file "asdf-source"))))
+                              (:file "source-forms")
+                              (:file "asdf-source"))))
   :in-order-to ((asdf:test-op (asdf:test-op #:surgeon/tests))))
 
 (asdf:defsystem #:surgeon/tests
